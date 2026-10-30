@@ -27,8 +27,13 @@
 html,
 body {
   width: 100%;
-  max-width: 100%;
+  max-width: 100vw;
+  overflow-x: hidden;
   overflow-x: clip;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 body {
@@ -352,6 +357,7 @@ body {
 
 #audioCanvas {
   width: 100%;
+  max-width: 100%;
   height: 100%;
   display: block;
 }
