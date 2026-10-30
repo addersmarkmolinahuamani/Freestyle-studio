@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#ff5500">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Freestyle Studio">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <title>Freestyle Rap Studio — Graba y Mezcla tus Sesiones</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="app-header">
+    <div class="brand">
+      <div class="brand-icon">🎤</div>
+      <div>
+        <h1>FREESTYLE <span>STUDIO</span></h1>
+        <p class="subtitle">Reproductor de Bases + Grabación Multipista &amp; Mezclador en Vivo</p>
+      </div>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="btnInstallPwa" hidden title="Instalar como aplicación en tu celular o PC">
+        📲 Instalar App
+      </button>
+      <div class="mic-status" id="micStatusBadge" title="Estado del micrófono">
+        <span class="dot" id="micDot"></span>
+        <span id="micStatusText">Micrófono sin activar</span>
+      </div>
+      <button class="btn btn-outline" id="btnEnableMic">🎙️ Conectar Micrófono</button>
+    </div>
+  </header>
+
+  <main class="studio-grid">
+    <!-- COLUMNA IZQUIERDA: PISTAS / BASES -->
+    <aside class="panel beats-panel">
+      <div class="panel-header">
+        <h2>🎵 Pistas (Bases)</h2>
+        <label class="btn btn-sm btn-secondary upload-label" title="Subir nueva pista a la carpeta">
+          + Añadir Pista
+          <input type="file" id="fileUploadBeat" accept="audio/*" hidden>
+        </label>
+      </div>
+      <p class="panel-hint">Selecciona una base de tu carpeta para practicar o grabar:</p>
+      <div class="beats-list" id="beatsList">
+        <div class="empty-state">Cargando bases de la carpeta...</div>
+      </div>
+
+      <!-- GENERADOR DE ESTÍMULOS FMS / ENTRENAMIENTO -->
+      <div class="word-generator-card">
+        <div class="word-header">
+          <span>⚡ Estímulos de Freestyle</span>
+          <div class="word-controls">
+            <select id="stimulusMode" aria-label="Modo de estímulo">
+              <option value="10">Easy Mode (10s)</option>
+              <option value="5">Hard Mode (5s)</option>
+              <option value="manual">Manual</option>
+            </select>
+            <button class="btn btn-xs" id="btnToggleStimulus">Activar</button>
+          </div>
+        </div>
+        <div class="stimulus-word" id="stimulusWord">LISTO PARA RIMAR</div>
+        <div class="stimulus-bar-wrap">
+          <div class="stimulus-bar" id="stimulusBar"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- COLUMNA CENTRAL: REPRODUCTOR Y CABINA DE GRABACIÓN -->
+    <section class="panel booth-panel">
+      <div class="active-beat-banner">
+        <div class="beat-badge">PISTA ACTIVA</div>
+        <h2 id="activeBeatTitle">Selecciona una pista para empezar</h2>
+      </div>
+
+      <!-- VISUALIZADOR ESPECTRAL DOBLE (PISTA + VOZ) -->
+      <div class="visualizer-container">
+        <canvas id="audioCanvas" width="800" height="200"></canvas>
+        <div class="visualizer-overlay">
+          <div class="rec-indicator" id="recIndicator" hidden>
+            <span class="rec-dot"></span> GRABANDO EN VIVO — <span id="recTimer">00:00</span>
+          </div>
+          <div class="vu-meters">
+            <div class="vu-row">
+              <span>PISTA</span>
+              <div class="vu-track"><div class="vu-fill beat-vu" id="vuBeat"></div></div>
+            </div>
+            <div class="vu-row">
+              <span>TU VOZ</span>
+              <div class="vu-track"><div class="vu-fill mic-vu" id="vuMic"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONTROLES DEL REPRODUCTOR DE LA BASE -->
+      <div class="player-controls-card">
+        <div class="timeline-row">
+          <span class="time-label" id="beatCurrentTime">00:00</span>
+          <input type="range" id="beatSeek" class="seek-slider" min="0" max="100" step="0.1" value="0">
+          <span class="time-label" id="beatDuration">00:00</span>
+        </div>
+
+        <div class="transport-buttons">
+          <button class="btn btn-icon" id="btnRestartBeat" title="Reiniciar pista desde 0:00">⏮️</button>
+          <button class="btn btn-play" id="btnPlayBeat" title="Reproducir / Pausar solo la pista">
+            ▶ Reproducir Pista
+          </button>
+          <button class="btn btn-rec" id="btnRecordSession" title="Grabar tu rapeo mientras suena la pista">
+            🔴 Grabar Freestyle
+          </button>
+          <button class="btn btn-stop" id="btnStopSession" disabled title="Detener grabación">
+            ⏹ Detener
+          </button>
+        </div>
+
+        <div class="live-options-row">
+          <div class="control-group">
+            <label for="liveBeatVol">🔊 Volumen Pista en Vivo: <strong id="liveBeatVolVal">85%</strong></label>
+            <input type="range" id="liveBeatVol" min="0" max="1.5" step="0.01" value="0.85">
+          </div>
+          <div class="control-group">
+            <label for="micDeviceSelect">🎙️ Entrada de Micrófono:</label>
+            <select id="micDeviceSelect">
+              <option value="">Micrófono predeterminado</option>
+            </select>
+          </div>
+          <div class="control-group checkbox-group" title="Actívalo solo si usas audífonos para no acoplar el sonido">
+            <label>
+              <input type="checkbox" id="chkMonitorMic">
+              🎧 Escuchar mi voz en vivo (Usar con audífonos)
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- CONSOLA DE MEZCLA DE TU GRABACIÓN (PISTA VS TU RAPEO) -->
+      <div class="mixer-card" id="mixerCard">
+        <div class="mixer-header">
+          <div>
+            <h3>🎚️ Estudio de Mezcla &amp; Reproducción de tu Grabación</h3>
+            <p id="activeRecordingSubtitle">Graba un freestyle o selecciona una toma guardada para ajustar los volúmenes por separado.</p>
+          </div>
+          <span class="take-badge" id="activeTakeBadge" hidden>TOMA CARGADA</span>
+        </div>
+
+        <div class="mixer-body" id="mixerBody" data-disabled="true">
+          <!-- Timeline de la grabación -->
+          <div class="timeline-row">
+            <span class="time-label" id="mixCurrentTime">00:00</span>
+            <input type="range" id="mixSeek" class="seek-slider mix-slider" min="0" max="100" step="0.05" value="0">
+            <span class="time-label" id="mixDuration">00:00</span>
+          </div>
+
+          <div class="mixer-channels">
+            <!-- CANAL 1: VOLUMEN DE LA PISTA EN LA GRABACIÓN -->
+            <div class="channel-strip beat-channel">
+              <div class="channel-top">
+                <span class="channel-icon">🎵</span>
+                <div>
+                  <h4>Volumen de la Pista</h4>
+                  <small>Sube o baja la base musical</small>
+                </div>
+                <span class="gain-readout" id="mixBeatGainVal">80%</span>
+              </div>
+              <input type="range" id="mixBeatGain" class="fader beat-fader" min="0" max="2" step="0.02" value="0.8">
+              <div class="channel-presets">
+                <button class="btn btn-xs" data-target="mixBeatGain" data-val="0">Mute (Acapella)</button>
+                <button class="btn btn-xs" data-target="mixBeatGain" data-val="0.6">Suave (60%)</button>
+                <button class="btn btn-xs" data-target="mixBeatGain" data-val="1.0">Normal (100%)</button>
+              </div>
+            </div>
+
+            <!-- CANAL 2: VOLUMEN DE TU VOZ (RAPEO) EN LA GRABACIÓN -->
+            <div class="channel-strip vocal-channel">
+              <div class="channel-top">
+                <span class="channel-icon">🎤</span>
+                <div>
+                  <h4>Volumen de tu Rapeo</h4>
+                  <small>Destaca tu voz hasta 300%</small>
+                </div>
+                <span class="gain-readout vocal-readout" id="mixVocalGainVal">150%</span>
+              </div>
+              <input type="range" id="mixVocalGain" class="fader vocal-fader" min="0" max="3" step="0.02" value="1.5">
+              <div class="channel-presets">
+                <button class="btn btn-xs" data-target="mixVocalGain" data-val="1.0">Normal (100%)</button>
+                <button class="btn btn-xs" data-target="mixVocalGain" data-val="1.7">Destacar Voz (170%)</button>
+                <button class="btn btn-xs" data-target="mixVocalGain" data-val="2.5">Máximo Boost (250%)</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- SINCRONIZACIÓN FINA Y EFECTO DE ESTUDIO -->
+          <div class="studio-tweaks-row">
+            <div class="tweak-item" title="Corrige el pequeño retraso del micrófono si sientes que tu voz quedó un poquito corrida respecto a la base">
+              <label for="vocalOffsetMs">⏱️ Ajuste de Sincronización Voz (Latencia): <strong id="vocalOffsetVal">-45 ms</strong></label>
+              <input type="range" id="vocalOffsetMs" min="-250" max="150" step="5" value="-45">
+            </div>
+            <div class="tweak-item" title="Comprime y ecualiza tu voz para que suene más clara sobre la base">
+              <label>
+                <input type="checkbox" id="chkStudioVoice" checked>
+                ✨ Claridad de Estudio (Compresor + Realce de Voz)
+              </label>
+            </div>
+          </div>
+
+          <div class="mixer-actions">
+            <button class="btn btn-play-mix" id="btnPlayMix">
+              ▶ Escuchar Mi Grabación Mezclada
+            </button>
+            <button class="btn btn-export" id="btnExportWav">
+              💾 Descargar Canción Mezclada (.WAV)
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- COLUMNA DERECHA: TOMAS GUARDADAS -->
+    <aside class="panel recordings-panel">
+      <div class="panel-header">
+        <h2>💿 Mis Grabaciones</h2>
+        <span class="counter-badge" id="recordingsCount">0</span>
+      </div>
+      <p class="panel-hint">Cada grabación guarda tu voz y la pista en canales independientes para mezclarlas cuando quieras.</p>
+      <div class="recordings-list" id="recordingsList">
+        <div class="empty-state">Aún no has grabado ninguna sesión. ¡Elige una base y dale a Grabar!</div>
+      </div>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
+

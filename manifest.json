@@ -1,0 +1,20 @@
+{
+  "name": "Freestyle Studio — Grabación & Mezcla de Rap",
+  "short_name": "Freestyle Studio",
+  "description": "Reproductor de bases de freestyle, grabación multipista y mezclador de volumen independiente para voz y pista.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0a0b10",
+  "theme_color": "#ff5500",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
