@@ -1,4 +1,4 @@
-const CACHE_NAME = 'freestyle-studio-v1';
+const CACHE_NAME = 'freestyle-studio-v2';
 const ASSETS = [
   './',
   './index.html',
@@ -37,4 +37,3 @@ self.addEventListener('fetch', (event) => {
       .catch(() => caches.match(event.request))
   );
 });
-
