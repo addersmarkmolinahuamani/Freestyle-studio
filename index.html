@@ -11,7 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
   <title>Freestyle Rap Studio — Graba y Mezcla tus Sesiones</title>
-  <link rel="stylesheet" href="styles.css?v=3">
+  <link rel="stylesheet" href="styles.css?v=4">
 </head>
 <body>
   <header class="app-header">
@@ -39,14 +39,19 @@
     <aside class="panel beats-panel">
       <div class="panel-header">
         <h2>🎵 Pistas (Bases)</h2>
-        <label class="btn btn-sm btn-secondary upload-label" title="Subir nueva pista a la carpeta">
-          + Añadir Pista
-          <input type="file" id="fileUploadBeat" accept="audio/*" hidden>
-        </label>
+        <div class="beats-header-btns">
+          <button class="btn btn-sm btn-outline" id="btnSyncDrive" title="Actualizar bases desde tu Google Drive">
+            🔄 Drive
+          </button>
+          <label class="btn btn-sm btn-secondary upload-label" title="Subir nueva pista a la carpeta">
+            + Añadir
+            <input type="file" id="fileUploadBeat" accept="audio/*" hidden>
+          </label>
+        </div>
       </div>
-      <p class="panel-hint">Selecciona una base de tu carpeta para practicar o grabar:</p>
+      <p class="panel-hint">Bases enlazadas a tu Google Drive para rapear y practicar:</p>
       <div class="beats-list" id="beatsList">
-        <div class="empty-state">Cargando bases de la carpeta...</div>
+        <div class="empty-state">Cargando bases de Google Drive...</div>
       </div>
 
       <!-- GENERADOR DE ESTÍMULOS FMS / ENTRENAMIENTO -->
@@ -232,7 +237,7 @@
     </aside>
   </main>
 
-  <script src="app.js?v=3"></script>
+  <script src="app.js?v=4"></script>
 </body>
 </html>
 

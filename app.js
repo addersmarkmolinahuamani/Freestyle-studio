@@ -64,6 +64,7 @@ state.beatAudioEl.crossOrigin = 'anonymous';
 // Elementos del DOM
 const dom = {
   beatsList: document.getElementById('beatsList'),
+  btnSyncDrive: document.getElementById('btnSyncDrive'),
   recordingsList: document.getElementById('recordingsList'),
   recordingsCount: document.getElementById('recordingsCount'),
   activeBeatTitle: document.getElementById('activeBeatTitle'),
@@ -239,20 +240,26 @@ async function loadBeats() {
 
 function renderBeats() {
   if (state.beats.length === 0) {
-    dom.beatsList.innerHTML = `<div class="empty-state">No hay archivos .mp3 o .wav en la carpeta. Sube uno con "+ Añadir Pista".</div>`;
+    dom.beatsList.innerHTML = `<div class="empty-state">No hay bases disponibles. Pulsa "🔄 Drive" o "+ Añadir".</div>`;
     return;
   }
   dom.beatsList.innerHTML = '';
   state.beats.forEach((beat, idx) => {
     const item = document.createElement('div');
-    const isActive = state.activeBeat && state.activeBeat.filename === beat.filename;
+    const isActive = state.activeBeat && (state.activeBeat.id === beat.id || state.activeBeat.filename === beat.filename);
     item.className = `beat-item ${isActive ? 'active' : ''}`;
-    const sizeMB = (beat.size / (1024 * 1024)).toFixed(1);
+    const sizeMB = beat.size ? `${(beat.size / (1024 * 1024)).toFixed(1)} MB` : 'En la nube';
+    const sourceBadge = beat.source === 'Google Drive' 
+      ? `<span class="drive-badge">☁️ Google Drive</span>`
+      : `<span class="drive-badge" style="color:#00ff88;background:rgba(0,255,136,0.15)">📁 Local</span>`;
     item.innerHTML = `
       <div class="beat-item-icon">${idx + 1}</div>
       <div class="beat-item-info">
         <div class="beat-item-title" title="${beat.title}">${beat.title}</div>
-        <div class="beat-item-sub">Base de Rap • ${sizeMB} MB</div>
+        <div class="beat-item-sub">
+          ${sourceBadge}
+          <span>• ${sizeMB}</span>
+        </div>
       </div>
     `;
     item.addEventListener('click', () => selectBeat(beat, true));
@@ -280,6 +287,26 @@ function selectBeat(beat, autoPlay = false) {
 }
 
 // Subir nueva pista (al servidor en PC o a IndexedDB en el celular)
+if (dom.btnSyncDrive) {
+  dom.btnSyncDrive.addEventListener('click', async () => {
+    dom.btnSyncDrive.disabled = true;
+    dom.btnSyncDrive.textContent = '⏳ ...';
+    try {
+      const res = await fetch('/api/sync-drive', { method: 'POST' });
+      if (res.ok) {
+        await loadBeats();
+      } else {
+        await loadBeats();
+      }
+    } catch (e) {
+      await loadBeats();
+    } finally {
+      dom.btnSyncDrive.disabled = false;
+      dom.btnSyncDrive.textContent = '🔄 Drive';
+    }
+  });
+}
+
 dom.fileUploadBeat.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (!file) return;
@@ -1132,7 +1159,7 @@ if (btnInstallPwa) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=3').then((reg) => {
+    navigator.serviceWorker.register('./sw.js?v=4').then((reg) => {
       reg.update();
     }).catch(() => {});
   });

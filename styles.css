@@ -169,6 +169,12 @@ body {
   gap: 8px;
 }
 
+.beats-header-btns {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .panel-header h2 {
   font-size: 1rem;
   font-weight: 700;
@@ -245,6 +251,21 @@ body {
   font-size: 0.72rem;
   color: var(--text-muted);
   margin-top: 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.drive-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(0, 229, 255, 0.15);
+  color: var(--accent-secondary);
 }
 
 /* WORD GENERATOR FMS */

@@ -24,7 +24,78 @@ const MIME_TYPES = {
   '.svg': 'image/svg+xml'
 };
 
+// Sincronizar bases desde Google Drive
+async function syncDriveBeats(folderId = '19t6ICr4GJ1WWJhEb36AT5jcpi2f24Nqh') {
+  try {
+    const url = `https://drive.google.com/drive/folders/${folderId}?usp=sharing`;
+    const res = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+      }
+    });
+    const html = await res.text();
+    const files = [];
+
+    const regexHex = /x22([a-zA-Z0-9_-]{25,})x22,x5bx22(?:[a-zA-Z0-9_-]+)x22x5d,x22([^"]+?\.(?:mp3|wav|m4a|ogg|aac))x22,x22(audio\/[^"]+)x22,[\d\w,null]*,(\d+)/gi;
+    let m;
+    while ((m = regexHex.exec(html)) !== null) {
+      const id = m[1];
+      let name = m[2].replace(/x5b/g, '[').replace(/x5d/g, ']').replace(/x22/g, '').replace(/u0026/g, '&');
+      const size = parseInt(m[4], 10) || 0;
+      if (!files.some(f => f.id === id)) {
+        files.push({ id, filename: name, size });
+      }
+    }
+
+    const regexNorm = /\["([a-zA-Z0-9_-]{25,})",\["(?:[a-zA-Z0-9_-]+)"\],"([^"]+?\.(?:mp3|wav|m4a|ogg|aac))","(audio\/[^"]+)",[\d\w,null]*,(\d+)/gi;
+    while ((m = regexNorm.exec(html)) !== null) {
+      const id = m[1];
+      const name = m[2];
+      const size = parseInt(m[4], 10) || 0;
+      if (!files.some(f => f.id === id)) {
+        files.push({ id, filename: name, size });
+      }
+    }
+
+    const regexFallback = /data-id="([a-zA-Z0-9_-]{25,})"[^>]*data-tooltip="([^"]+?\.(?:mp3|wav|m4a|ogg|aac))\s+Audio"/gi;
+    while ((m = regexFallback.exec(html)) !== null) {
+      const id = m[1];
+      const name = m[2].replace(/&amp;/g, '&');
+      if (!files.some(f => f.id === id)) {
+        files.push({ id, filename: name, size: 0 });
+      }
+    }
+
+    if (files.length > 0) {
+      const beats = files.map(f => ({
+        id: f.id,
+        filename: f.filename,
+        title: f.filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, ' ').trim(),
+        source: 'Google Drive',
+        driveUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
+        url: `https://drive.google.com/uc?export=download&id=${f.id}`,
+        size: f.size
+      }));
+      fs.writeFileSync(path.join(ROOT_DIR, 'beats.json'), JSON.stringify(beats, null, 2), 'utf8');
+      console.log(`[Google Drive] ${beats.length} bases sincronizadas.`);
+      return beats;
+    }
+  } catch (err) {
+    console.error('[Google Drive] Error sincronizando:', err.message);
+  }
+  return null;
+}
+
 function getBeats() {
+  const jsonPath = path.join(ROOT_DIR, 'beats.json');
+  if (fs.existsSync(jsonPath)) {
+    try {
+      const beats = JSON.parse(fs.readFileSync(jsonPath, 'utf8'));
+      if (Array.isArray(beats) && beats.length > 0) {
+        return beats;
+      }
+    } catch (e) {}
+  }
   const files = fs.readdirSync(ROOT_DIR);
   const audioExts = ['.mp3', '.wav', '.ogg', '.m4a', '.webm'];
   return files
@@ -34,6 +105,7 @@ function getBeats() {
       return {
         filename: f,
         title: path.basename(f, path.extname(f)).replace(/\s+/g, ' ').trim(),
+        source: 'Local',
         url: '/media/' + encodeURIComponent(f),
         size: stats.size
       };
@@ -105,6 +177,18 @@ const server = http.createServer((req, res) => {
     const beats = getBeats();
     res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify(beats));
+    return;
+  }
+
+  // API: Refresh Google Drive Beats
+  if (pathname === '/api/sync-drive' && req.method === 'POST') {
+    syncDriveBeats().then((updated) => {
+      res.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true, beats: updated || getBeats() }));
+    }).catch(err => {
+      res.writeHead(500, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify({ ok: false, error: err.message }));
+    });
     return;
   }
 
@@ -220,5 +304,6 @@ server.listen(PORT, () => {
   console.log(`🎤 FREESTYLE RAP STUDIO ejecutándose en:`);
   console.log(`👉 http://localhost:${PORT}`);
   console.log(`====================================================`);
+  syncDriveBeats();
 });
 
