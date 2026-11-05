@@ -15,3 +15,4 @@ if /i "%subir%"=="S" (
   echo [OK] Pistas subidas a GitHub. Ya estan disponibles en tu celular!
 )
 pause
+

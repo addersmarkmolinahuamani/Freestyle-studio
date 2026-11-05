@@ -97,7 +97,7 @@ function getBeats() {
       if (Array.isArray(beats) && beats.length > 0) {
         return beats;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
   const files = fs.readdirSync(ROOT_DIR);
   const audioExts = ['.mp3', '.wav', '.ogg', '.m4a', '.webm'];
@@ -232,7 +232,7 @@ const server = http.createServer((req, res) => {
     req.pipe(writeStream);
     writeStream.on('finish', () => {
       let meta = {};
-      try { meta = JSON.parse(metaRaw); } catch (e) {}
+      try { meta = JSON.parse(metaRaw); } catch (e) { }
       const recordData = {
         id,
         title: meta.title || `Sesión Freestyle`,
@@ -263,7 +263,7 @@ const server = http.createServer((req, res) => {
           const vPath = path.join(RECORDINGS_DIR, path.basename(meta.vocalFilename));
           if (fs.existsSync(vPath)) fs.unlinkSync(vPath);
         }
-      } catch (e) {}
+      } catch (e) { }
       fs.unlinkSync(jsonPath);
     }
     res.writeHead(200, { 'Content-Type': 'application/json' });
