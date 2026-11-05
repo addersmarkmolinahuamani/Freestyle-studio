@@ -222,7 +222,7 @@ async function loadBeats() {
 
 function renderBeats() {
   if (state.beats.length === 0) {
-    dom.beatsList.innerHTML = `<div class="empty-state">No hay bases disponibles. Pulsa "🔄 Drive" o "+ Añadir".</div>`;
+    dom.beatsList.innerHTML = `<div class="empty-state">No hay bases disponibles. Pulsa "+ Añadir Base".</div>`;
     return;
   }
   dom.beatsList.innerHTML = '';
@@ -230,16 +230,13 @@ function renderBeats() {
     const item = document.createElement('div');
     const isActive = state.activeBeat && (state.activeBeat.id === beat.id || state.activeBeat.filename === beat.filename);
     item.className = `beat-item ${isActive ? 'active' : ''}`;
-    const sizeMB = beat.size ? `${(beat.size / (1024 * 1024)).toFixed(1)} MB` : 'En la nube';
-    const sourceBadge = beat.source === 'Google Drive' 
-      ? `<span class="drive-badge">☁️ Google Drive</span>`
-      : `<span class="drive-badge" style="color:#00ff88;background:rgba(0,255,136,0.15)">📁 Local</span>`;
+    const sizeMB = beat.size ? `${(beat.size / (1024 * 1024)).toFixed(1)} MB` : 'Listo';
     item.innerHTML = `
       <div class="beat-item-icon">${idx + 1}</div>
       <div class="beat-item-info">
         <div class="beat-item-title" title="${beat.title}">${beat.title}</div>
         <div class="beat-item-sub">
-          ${sourceBadge}
+          <span class="drive-badge" style="color:#00e5ff;background:rgba(0,229,255,0.15)">🎵 Base</span>
           <span>• ${sizeMB}</span>
         </div>
       </div>
@@ -1119,7 +1116,7 @@ if (btnInstallPwa) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=6').then((reg) => {
+    navigator.serviceWorker.register('./sw.js?v=7').then((reg) => {
       reg.update();
     }).catch(() => {});
   });

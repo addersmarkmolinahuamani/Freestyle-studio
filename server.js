@@ -108,8 +108,7 @@ function getBeats() {
       return {
         filename: f,
         title: path.basename(f, path.extname(f)).replace(/\s+/g, ' ').trim(),
-        source: 'Local',
-        url: '/media/' + encodeURIComponent(f),
+        url: './' + encodeURIComponent(f),
         size: stats.size
       };
     });

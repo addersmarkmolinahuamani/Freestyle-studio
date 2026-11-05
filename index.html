@@ -11,7 +11,7 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon.svg">
   <title>Freestyle Rap Studio — Graba y Mezcla tus Sesiones</title>
-  <link rel="stylesheet" href="styles.css?v=6">
+  <link rel="stylesheet" href="styles.css?v=7">
 </head>
 <body>
   <header class="app-header">
@@ -40,18 +40,15 @@
       <div class="panel-header">
         <h2>🎵 Pistas (Bases)</h2>
         <div class="beats-header-btns">
-          <button class="btn btn-sm btn-outline" id="btnSyncDrive" title="Actualizar bases desde tu Google Drive">
-            🔄 Drive
-          </button>
-          <label class="btn btn-sm btn-secondary upload-label" title="Subir nueva pista a la carpeta">
-            + Añadir
+          <label class="btn btn-sm btn-secondary upload-label" title="Subir nueva pista">
+            + Añadir Base
             <input type="file" id="fileUploadBeat" accept="audio/*" hidden>
           </label>
         </div>
       </div>
-      <p class="panel-hint">Bases enlazadas a tu Google Drive para rapear y practicar:</p>
+      <p class="panel-hint">Bases de rap listas para reproducir, grabar y mezclar:</p>
       <div class="beats-list" id="beatsList">
-        <div class="empty-state">Cargando bases de Google Drive...</div>
+        <div class="empty-state">Cargando bases...</div>
       </div>
     </aside>
 
@@ -218,7 +215,7 @@
     </aside>
   </main>
 
-  <script src="app.js?v=6"></script>
+  <script src="app.js?v=7"></script>
 </body>
 </html>
 
