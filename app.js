@@ -2,14 +2,6 @@
 // FREESTYLE RAP STUDIO - MOTOR DE AUDIO MULTIPISTA Y MEZCLADOR EN TIEMPO REAL
 // ============================================================================
 
-const FMS_WORDS = [
-  'IMPROVISACIÓN', 'CORONA', 'ASFALTO', 'DESTINO', 'RELÁMPAGO', 'ESPEJO',
-  'GRAVEDAD', 'ALQUIMIA', 'FRONTERA', 'SILENCIO', 'CICATRIZ', 'HORIZONTE',
-  'LABERINTO', 'TORMENTA', 'LEALTAD', 'INSTINTO', 'CENIZAS', 'MEMORIA',
-  'REVOLUCIÓN', 'UNIVERSO', 'METÁFORA', 'ADRENALINA', 'CÓDIGO', 'VICTORIA',
-  'RESILIENCIA', 'SOMBRA', 'FUEGO', 'LIBERTAD', 'IMPACTO', 'LEYENDA'
-];
-
 // Estado global
 const state = {
   beats: [],
@@ -51,12 +43,7 @@ const state = {
   mixVocalGainNode: null,
   mixVocalCompNode: null,
   mixVocalPresenceNode: null,
-  mixAnimFrame: null,
-
-  // Generador de palabras
-  stimulusActive: false,
-  stimulusTimer: null,
-  stimulusProgress: 0
+  mixAnimFrame: null
 };
 
 state.beatAudioEl.crossOrigin = 'anonymous';
@@ -106,12 +93,7 @@ const dom = {
   vocalOffsetVal: document.getElementById('vocalOffsetVal'),
   chkStudioVoice: document.getElementById('chkStudioVoice'),
   btnPlayMix: document.getElementById('btnPlayMix'),
-  btnExportWav: document.getElementById('btnExportWav'),
-
-  stimulusMode: document.getElementById('stimulusMode'),
-  btnToggleStimulus: document.getElementById('btnToggleStimulus'),
-  stimulusWord: document.getElementById('stimulusWord'),
-  stimulusBar: document.getElementById('stimulusBar')
+  btnExportWav: document.getElementById('btnExportWav')
 };
 
 // Utilidad para formatear segundos a MM:SS
@@ -1096,45 +1078,7 @@ function startVisualizerLoop() {
 }
 
 // ============================================================================
-// 7. ENTRENADOR FMS (PALABRAS CADA 10s / 5s)
-// ============================================================================
-function nextStimulusWord() {
-  const randomWord = FMS_WORDS[Math.floor(Math.random() * FMS_WORDS.length)];
-  dom.stimulusWord.textContent = randomWord;
-  state.stimulusProgress = 0;
-}
-
-dom.btnToggleStimulus.addEventListener('click', () => {
-  const mode = dom.stimulusMode.value;
-  if (mode === 'manual') {
-    nextStimulusWord();
-    return;
-  }
-
-  state.stimulusActive = !state.stimulusActive;
-  if (state.stimulusActive) {
-    dom.btnToggleStimulus.textContent = 'Detener';
-    nextStimulusWord();
-    const intervalSec = parseInt(mode, 10) || 10;
-    clearInterval(state.stimulusTimer);
-    state.stimulusTimer = setInterval(() => {
-      state.stimulusProgress += 0.1;
-      const pct = Math.min(100, (state.stimulusProgress / intervalSec) * 100);
-      dom.stimulusBar.style.width = `${pct}%`;
-      if (state.stimulusProgress >= intervalSec) {
-        nextStimulusWord();
-      }
-    }, 100);
-  } else {
-    dom.btnToggleStimulus.textContent = 'Activar';
-    clearInterval(state.stimulusTimer);
-    dom.stimulusBar.style.width = '0%';
-    dom.stimulusWord.textContent = 'LISTO PARA RIMAR';
-  }
-});
-
-// ============================================================================
-// 8. INSTALACIÓN COMO APP MÓVIL (PWA) Y SERVICE WORKER
+// 7. INSTALACIÓN COMO APP MÓVIL (PWA) Y SERVICE WORKER
 // ============================================================================
 let deferredInstallPrompt = null;
 const btnInstallPwa = document.getElementById('btnInstallPwa');
@@ -1159,7 +1103,7 @@ if (btnInstallPwa) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=4').then((reg) => {
+    navigator.serviceWorker.register('./sw.js?v=5').then((reg) => {
       reg.update();
     }).catch(() => {});
   });
