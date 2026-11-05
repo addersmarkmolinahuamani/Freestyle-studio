@@ -1,9 +1,9 @@
-const CACHE_NAME = 'freestyle-studio-v5';
+const CACHE_NAME = 'freestyle-studio-v6';
 const ASSETS = [
   './',
   './index.html',
-  './styles.css?v=5',
-  './app.js?v=5',
+  './styles.css?v=6',
+  './app.js?v=6',
   './manifest.json',
   './icon.svg',
   './beats.json'
@@ -26,8 +26,12 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
-  // If request is for Google Drive stream, do not cache or intercept
-  if (event.request.url.includes('drive.google.com') || event.request.url.includes('docs.google.com')) {
+  // Never intercept or cache Google Drive media stream requests
+  if (
+    event.request.url.includes('drive.google.com') ||
+    event.request.url.includes('drive.usercontent.google.com') ||
+    event.request.url.includes('docs.google.com')
+  ) {
     return;
   }
   event.respondWith(

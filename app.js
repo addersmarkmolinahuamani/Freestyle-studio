@@ -257,14 +257,24 @@ function selectBeat(beat, autoPlay = false) {
   stopMixPlayback();
   state.activeBeat = beat;
   dom.activeBeatTitle.textContent = beat.title;
+  
+  // Asignar crossOrigin antes de cargar
+  state.beatAudioEl.crossOrigin = 'anonymous';
   state.beatAudioEl.src = beat.url;
   state.beatAudioEl.load();
   renderBeats();
 
   if (autoPlay) {
     ensureAudioContext();
-    state.beatAudioEl.play();
-    updatePlayButtonUI();
+    const playPromise = state.beatAudioEl.play();
+    if (playPromise !== undefined) {
+      playPromise.then(() => {
+        updatePlayButtonUI();
+      }).catch(err => {
+        console.warn('AutoPlay prevenido o error de reproducción:', err);
+        updatePlayButtonUI();
+      });
+    }
   }
 }
 
@@ -409,11 +419,17 @@ dom.btnPlayBeat.addEventListener('click', () => {
   stopMixPlayback();
 
   if (state.beatAudioEl.paused) {
-    state.beatAudioEl.play();
+    const p = state.beatAudioEl.play();
+    if (p !== undefined) {
+      p.then(() => updatePlayButtonUI()).catch(e => {
+        console.error('Error al reproducir audio:', e);
+        updatePlayButtonUI();
+      });
+    }
   } else {
     state.beatAudioEl.pause();
+    updatePlayButtonUI();
   }
-  updatePlayButtonUI();
 });
 
 dom.btnRestartBeat.addEventListener('click', () => {
@@ -1103,7 +1119,7 @@ if (btnInstallPwa) {
 
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js?v=5').then((reg) => {
+    navigator.serviceWorker.register('./sw.js?v=6').then((reg) => {
       reg.update();
     }).catch(() => {});
   });

@@ -67,15 +67,18 @@ async function syncDriveBeats(folderId = '19t6ICr4GJ1WWJhEb36AT5jcpi2f24Nqh') {
     }
 
     if (files.length > 0) {
-      const beats = files.map(f => ({
-        id: f.id,
-        filename: f.filename,
-        title: f.filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, ' ').trim(),
-        source: 'Google Drive',
-        driveUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
-        url: `https://drive.google.com/uc?export=download&id=${f.id}`,
-        size: f.size
-      }));
+      const beats = files.map(f => {
+        const streamUrl = `https://drive.usercontent.google.com/download?id=${f.id}&export=download`;
+        return {
+          id: f.id,
+          filename: f.filename,
+          title: f.filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, ' ').trim(),
+          source: 'Google Drive',
+          driveUrl: streamUrl,
+          url: streamUrl,
+          size: f.size
+        };
+      });
       fs.writeFileSync(path.join(ROOT_DIR, 'beats.json'), JSON.stringify(beats, null, 2), 'utf8');
       console.log(`[Google Drive] ${beats.length} bases sincronizadas.`);
       return beats;

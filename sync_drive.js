@@ -57,13 +57,14 @@ async function syncDriveFolder(folderId = '19t6ICr4GJ1WWJhEb36AT5jcpi2f24Nqh') {
   
   const beats = files.map(f => {
     const cleanTitle = f.filename.replace(/\.[^/.]+$/, '').replace(/\s+/g, ' ').trim();
+    const streamUrl = `https://drive.usercontent.google.com/download?id=${f.id}&export=download`;
     return {
       id: f.id,
       filename: f.filename,
       title: cleanTitle,
       source: 'Google Drive',
-      driveUrl: `https://drive.google.com/uc?export=download&id=${f.id}`,
-      url: `https://drive.google.com/uc?export=download&id=${f.id}`,
+      driveUrl: streamUrl,
+      url: streamUrl,
       size: f.size
     };
   });
@@ -74,3 +75,4 @@ async function syncDriveFolder(folderId = '19t6ICr4GJ1WWJhEb36AT5jcpi2f24Nqh') {
 }
 
 syncDriveFolder();
+
